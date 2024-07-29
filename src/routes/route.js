@@ -7,8 +7,8 @@ const authenticate = require('../middleware/authMiddleware');
 
 
 // Authentication routes
-app.post('/register', authController.registerUser);
-app.post('/login', authController.loginUser);
+router.post('/register', authController.registerUser);
+router.post('/login', authController.loginUser);
 
 router.post("/events", authenticate,eventController.createEvent);
 router.get("/events", authenticate,eventController.getAllEvents);
@@ -19,3 +19,7 @@ router.get("/events/:id/weather", authenticate,eventController.getWeatherForEven
 // Session routes
 router.get("/sessions", authenticate,sessionController.getUserSessions);
 router.post("/sessions/:sessionId/end", authenticate,sessionController.endSession);
+
+
+
+module.exports = router;

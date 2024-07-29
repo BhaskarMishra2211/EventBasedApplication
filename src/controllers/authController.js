@@ -6,6 +6,8 @@ const User = require('../models/user.model'); // Your user model in MongoDB
 exports.registerUser = async (req, res) => {
     const { email, password, name } = req.body;
 
+    // console.log("inside Register User Function or Controller...!")
+
     try {
         // Create user in Supabase
         const { data, error } = await supabase.auth.signUp({ email, password });
