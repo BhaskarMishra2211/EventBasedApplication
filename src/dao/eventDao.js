@@ -2,81 +2,96 @@ const Event = require('../models/event.model');
 const User = require('../models/user.model');
 const axios = require('axios');
 
-exports.createEvent = async (req, res) => {
-    const { name, date, location, description } = req.body;
+exports.createEvent = async ({ name, userid, date, location, description }) => {
+    console.log("Inside Dao ....")
     try {
-        const user = await User.findOne({ supabaseId: req.user.id });
+        console.log("Inside try...")
+        const user = await User.findOne({ supabaseId: userid });
+        console.log("Inside User find one....");
+        if (!user) {
+            throw new Error('User not found');
+        }
         const newEvent = new Event({
             name,
             date,
             location,
             description,
-            user: user._id
+            user: user._id // Use the MongoDB ObjectId here
         });
-        await newEvent.save();
-        res.status(201).json(newEvent);
+        let res = await newEvent.save();
+        return res;
     } catch (error) {
-        res.status(400).json({ error: error.message });
+        throw error; // Throw the error instead of returning the message
     }
 };
 
-exports.getAllEvents = async (req, res) => {
+exports.getAllEvents = async (userid) => {
     try {
-        const user = await User.findOne({ supabaseId: req.user.id });
+        const user = await User.findOne({ supabaseId: userid });
         const events = await Event.find({ user: user._id });
-        res.json(events);
+        return events;
     } catch (error) {
-        res.status(400).json({ error: error.message });
+        return error.message;
     }
 };
 
-exports.updateEvent = async (req, res) => {
-    const { id } = req.params;
-    const { name, date, location, description } = req.body;
+exports.updateEvent = async ({name,date,location,description,id,userid}) => {
     try {
-        const user = await User.findOne({ supabaseId: req.user.id });
+        // console.log("User Id : ",userid);
+        const user = await User.findOne({ supabaseId: userid });
+        // console.log("User Id : ",userid);
         const event = await Event.findOneAndUpdate(
             { _id: id, user: user._id },
             { name, date, location, description },
             { new: true }
         );
         if (!event) {
-            return res.status(404).json({ error: 'Event not found' });
+            return "Event Not Found...!";
         }
-        res.json(event);
+        return event;
     } catch (error) {
-        res.status(400).json({ error: error.message });
+        return error.message;
     }
 };
 
-
-exports.deleteEvent = async (req, res) => {
-    const { id } = req.params;
+exports.deleteEvent = async (supabaseId, eventId) => {
     try {
-        const event = await eventDao.deleteEvent(req.user.id, id);
-        if (!event) {
-            return res.status(404).json({ error: 'Event not found' });
+        // First, find the user by their Supabase ID
+        const user = await User.findOne({ supabaseId: supabaseId });
+        if (!user) {
+            throw new Error('User not found');
         }
-        res.json({ message: 'Event deleted successfully' });
+
+        // Now use the user's MongoDB _id to delete the event
+        const deletedEvent = await Event.findOneAndDelete({ _id: eventId, user: user._id });
+        if (!deletedEvent) {
+            throw new Error('Event not found or user not authorized to delete this event');
+        }
+        return deletedEvent;
     } catch (error) {
-        res.status(400).json({ error: error.message });
+        console.error('Error in deleteEvent:', error);
+        throw error;
     }
 };
 
-exports.getWeatherForEvent = async (req, res) => {
-    const { id } = req.params;
+exports.getWeatherForEvent = async (userid, id) => {
+
+    console.log("Inside Weather dao Function.....")
     try {
-        const event = await eventDao.getEventById(req.user.id, id);
+        const user = await User.findOne({ supabaseId: userid });
+        const event = await Event.findOne({ user: user._id });
+        console.log("Event : ",event);
         if (!event) {
             return res.status(404).json({ error: 'Event not found' });
         }
 
         const response = await axios.get(`http://api.openweathermap.org/data/2.5/weather?q=${event.location}&appid=${process.env.OPENWEATHERMAP_API_KEY}&units=metric`);
-        res.json({
+        data = ({
             event: event,
             weather: response.data
         });
+        return data;
     } catch (error) {
-        res.status(400).json({ error: 'Unable to fetch weather data' });
+        return error.message;
     }
 };

@@ -10,15 +10,15 @@ const authenticate = require('../middleware/authMiddleware');
 router.post('/register', authController.registerUser);
 router.post('/login', authController.loginUser);
 
-router.post("/events", authenticate,eventController.createEvent);
-router.get("/events", authenticate,eventController.getAllEvents);
-router.put("/events/:id", authenticate,eventController.updateEvent);
-router.delete("/events/:id", authenticate,eventController.deleteEvent);
-router.get("/events/:id/weather", authenticate,eventController.getWeatherForEvent);
+router.post("/events", eventController.createEvent);
+router.get("/events", eventController.getAllEvents);
+router.put("/events/", eventController.updateEvent);
+router.delete("/events/", eventController.deleteEvent);
+router.get("/events/weather", eventController.getWeatherForEvent);
 
 // Session routes
-router.get("/sessions", authenticate,sessionController.getUserSessions);
-router.post("/sessions/:sessionId/end", authenticate,sessionController.endSession);
+router.get("/sessions", sessionController.getUserSessions);
+router.post("/sessions/end", sessionController.endSession);
 
 
 
