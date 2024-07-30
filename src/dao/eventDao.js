@@ -3,11 +3,8 @@ const User = require('../models/user.model');
 const axios = require('axios');
 
 exports.createEvent = async ({ name, userid, date, location, description }) => {
-    console.log("Inside Dao ....")
     try {
-        console.log("Inside try...")
         const user = await User.findOne({ supabaseId: userid });
-        console.log("Inside User find one....");
         if (!user) {
             throw new Error('User not found');
         }
@@ -37,9 +34,7 @@ exports.getAllEvents = async (userid) => {
 
 exports.updateEvent = async ({name,date,location,description,id,userid}) => {
     try {
-        // console.log("User Id : ",userid);
         const user = await User.findOne({ supabaseId: userid });
-        // console.log("User Id : ",userid);
         const event = await Event.findOneAndUpdate(
             { _id: id, user: user._id },
             { name, date, location, description },
@@ -62,7 +57,6 @@ exports.deleteEvent = async (supabaseId, eventId) => {
             throw new Error('User not found');
         }
 
-        // Now use the user's MongoDB _id to delete the event
         const deletedEvent = await Event.findOneAndDelete({ _id: eventId, user: user._id });
         if (!deletedEvent) {
             throw new Error('Event not found or user not authorized to delete this event');

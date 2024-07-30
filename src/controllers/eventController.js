@@ -2,15 +2,10 @@ const eventDao = require('../dao/eventDao');
 const axios = require('axios');
 
 exports.createEvent = async (req, res) => {
-    console.log("Inside Create Event Controller...")
-    console.log("Request Body : ",req.body);
     const { name, userid, date, location, description } = req.body;
-    console.log("Name : ", name);
 
     try {
-        console.log("inside try block...")
         const newEvent = await eventDao.createEvent({ name, userid, date, location, description });
-        console.log("After dao called....")
         res.status(201).json(newEvent);
     } catch (error) {
         res.status(400).json({ error: error.message });
@@ -62,12 +57,6 @@ exports.getWeatherForEvent = async (req, res) => {
         if (!event) {
             return res.status(404).json({ error: 'Event not found' });
         }
-
-        // const response = await axios.get(`http://api.openweathermap.org/data/2.5/weather?q=${event.location}&appid=${process.env.OPENWEATHERMAP_API_KEY}&units=metric`);
-        /* res.json({
-            event: event,
-            weather: response.data
-        }); */
 
         res.json(event);
     } catch (error) {
